@@ -312,12 +312,63 @@ The recommended base class is *TimedRobot.*
 * The *`TimedRobot`* class is the base class recommended for most users. It provides control of the robot program through a collection of *`init()`*, *`periodic()`*, and *`exit()`* methods, which are called by WPILib during specific robot states (e.g. autonomous or teleoperated). During these calls, your code typically polls each input device and acts according to the data it receives. For instance, you would typically determine the position of the joystick and state of the joystick buttons on each call and act accordingly. The *`TimedRobot`* class also provides an example of retrieving autonomous routines through SendableChooser*
 
 ```
-import edu.wpi.first.wpilibj.TimedRobot;/** * The VM is configured to automatically run this class, and to call the functions corresponding to * each mode, as described in the TimedRobot documentation. If you change the name of this class or * the package after creating this project, you must also update the build.gradle file in the * project. */public class Robot extends TimedRobot {    /**     * This function is run when the robot is first started up and should be used for any     * initialization code.     */    @Override    public void robotInit() {}    @Override    public void robotPeriodic() {}    @Override    public void autonomousInit() {}    @Override    public void autonomousPeriodic() {}    @Override    public void teleopInit() {}    @Override    public void teleopPeriodic() {}    @Override    public void disabledInit() {}    @Override    public void disabledPeriodic() {}    @Override    public void testInit() {}    @Override    public void testPeriodic() {}    @Override    public void simulationInit() {}    @Override    public void simulationPeriodic() {}}
+import edu.wpi.first.wpilibj.TimedRobot;
+
+/**
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
+ * project.
+ */
+public class Robot extends TimedRobot {
+
+    /**
+     * This function is run when the robot is first started up and should be used for any
+     * initialization code.
+     */
+    @Override
+    public void robotInit() {}
+
+    @Override
+    public void robotPeriodic() {}
+
+    @Override
+    public void autonomousInit() {}
+
+    @Override
+    public void autonomousPeriodic() {}
+
+    @Override
+    public void teleopInit() {}
+
+    @Override
+    public void teleopPeriodic() {}
+
+    @Override
+    public void disabledInit() {}
+
+    @Override
+    public void disabledPeriodic() {}
+
+    @Override
+    public void testInit() {}
+
+    @Override
+    public void testPeriodic() {}
+
+    @Override
+    public void simulationInit() {}
+
+    @Override
+    public void simulationPeriodic() {}
+}
 ```
 Periodic methods are called every 20 ms by default. This can be changed by calling the superclass constructor with the new desired update rate.
 
 ```
-public Robot() {  super(0.03); // Periodic methods will now be called every 30 ms.}
+public Robot() {
+  super(0.03); // Periodic methods will now be called every 30 ms.
+}
 ```
 # Creating New WPlLib Project
 
@@ -453,7 +504,16 @@ SmartDashboard.putNumber("Joystick X value", joystick1.getX());
 Often debugging or monitoring the status of a robot involves writing a number of values to the console and watching them stream by. With Shuffleboard you can put values to a GUI that is automatically constructed based on your program. As values are updated, the corresponding GUI element changes value - there is no need to try to catch numbers streaming by on the screen.
 
 ```
-protected void execute() {    SmartDashboard.putBoolean("Bridge Limit", bridgeTipper.atBridge());    SmartDashboard.putNumber("Bridge Angle", bridgeTipper.getPosition());    SmartDashboard.putNumber("Swerve Angle", drivetrain.getSwerveAngle());    SmartDashboard.putNumber("Left Drive Encoder", drivetrain.getLeftEncoder());    SmartDashboard.putNumber("Right Drive Encoder", drivetrain.getRightEncoder());    SmartDashboard.putNumber("Turret Pot", turret.getCurrentAngle());    SmartDashboard.putNumber("Turret Pot Voltage", turret.getAverageVoltage());    SmartDashboard.putNumber("RPM", shooter.getRPM());}
+protected void execute() {
+    SmartDashboard.putBoolean("Bridge Limit", bridgeTipper.atBridge());
+    SmartDashboard.putNumber("Bridge Angle", bridgeTipper.getPosition());
+    SmartDashboard.putNumber("Swerve Angle", drivetrain.getSwerveAngle());
+    SmartDashboard.putNumber("Left Drive Encoder", drivetrain.getLeftEncoder());
+    SmartDashboard.putNumber("Right Drive Encoder", drivetrain.getRightEncoder());
+    SmartDashboard.putNumber("Turret Pot", turret.getCurrentAngle());
+    SmartDashboard.putNumber("Turret Pot Voltage", turret.getAverageVoltage());
+    SmartDashboard.putNumber("RPM", shooter.getRPM());
+}
 ```
 ![](/images/mhu_Image_12.png)
 
@@ -509,7 +569,17 @@ Shuffleboard.getTab("Numbers").add("Pi", 3.14);
 Updating
 
 ```
-class VisionCalculator {   private ShuffleboardTab tab = Shuffleboard.getTab("Vision");   private NetworkTableEntry distanceEntry =       tab.add("Distance to target", 0)          .getEntry();   public void calculate() {     double distance = ...;     distanceEntry.setDouble(distance);   } }
+class VisionCalculator {
+   private ShuffleboardTab tab = Shuffleboard.getTab("Vision");
+   private NetworkTableEntry distanceEntry =
+       tab.add("Distance to target", 0)
+          .getEntry();
+
+   public void calculate() {
+     double distance = ...;
+     distanceEntry.setDouble(distance);
+   }
+ }
 Call getEntry() after defining the value, then update it when needed or in a periodic function
 
 

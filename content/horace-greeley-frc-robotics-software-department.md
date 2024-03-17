@@ -238,18 +238,12 @@ In VSCode, you can use the keyboard command ?Command+Shift+P?(macOS) or ?Ctrl+Sh
 
 To start a project using one of the WPILib robot program templates, users must first choose a base class for their robot. Users subclass these base classes to create their primary `Robot` class, which controls the main flow of the robot program. 
 
-The recommended base class is *TimedRobot.*
+We will be using Command Based Robot.
 
-* The *`TimedRobot`* class is the base class recommended for most users. It provides control of the robot program through a collection of *`init()`*, *`periodic()`*, and *`exit()`* methods, which are called by WPILib during specific robot states (e.g. autonomous or teleoperated). During these calls, your code typically polls each input device and acts according to the data it receives. For instance, you would typically determine the position of the joystick and state of the joystick buttons on each call and act accordingly. The *`TimedRobot`* class also provides an example of retrieving autonomous routines through SendableChooser*
+The `Command Robot` framework adds to the basic functionality of a `Timed Robot` by automatically polling inputs and converting the raw input data into events. These events are tied to user code, which is executed when the event is triggered. For instance, when a button is pressed, code tied to the pressing of that button is automatically called and it is not necessary to poll or keep track of the state of that button directly. The `Command Robot` framework makes it easier to write compact easy-to-read code with complex behavior, but requires an additional up-front time investment from a programmer in order to understand how the Command Robot framework works.
 
-```
-import edu.wpi.first.wpilibj.TimedRobot;/** * The VM is configured to automatically run this class, and to call the functions corresponding to * each mode, as described in the TimedRobot documentation. If you change the name of this class or * the package after creating this project, you must also update the build.gradle file in the * project. */public class Robot extends TimedRobot {    /**     * This function is run when the robot is first started up and should be used for any     * initialization code.     */    @Override    public void robotInit() {}    @Override    public void robotPeriodic() {}    @Override    public void autonomousInit() {}    @Override    public void autonomousPeriodic() {}    @Override    public void teleopInit() {}    @Override    public void teleopPeriodic() {}    @Override    public void disabledInit() {}    @Override    public void disabledPeriodic() {}    @Override    public void testInit() {}    @Override    public void testPeriodic() {}    @Override    public void simulationInit() {}    @Override    public void simulationPeriodic() {}}
-```
-Periodic methods are called every 20 ms by default. This can be changed by calling the superclass constructor with the new desired update rate.
+More on [Command Based Programming](#heading=h.innoh1sfunk9).
 
-```
-public Robot() {  super(0.03); // Periodic methods will now be called every 30 ms.}
-```
 # Creating New WPlLib Project
 
 1. Go to VSCode and open command palette using ?Command+Shift+P? or ?Ctrl+Shift+P?
@@ -636,7 +630,300 @@ Data logs are binary, so converting them to CSV will improve readability.
 
 - [Oblog](https://github.com/Oblarg/Oblog) (Java only): Minimalistic annotation-based API for Shuffleboard (or plain NetworkTables) telemetry.
 
+# 
+
+# 
+
+# 
+
+# 
+
+# Programming(Command Based)
+
+## Git Version Control
+
+Git is a Distributed Version Control System used for tracking changes in code. It allows for separation of testing environments into different branches, ability to manage different commits, etc.
+
+Download links:
+
+- [Windows](https://git-scm.com/download/win)
+
+- [macOS](https://git-scm.com/download/mac)
+
+- [Linux](https://git-scm.com/download/linux)
+
+Some Important Vocabulary:
+
+- **Repository**: the data structure of your code, including a .git folder in the root directory
+
+- **Commit**: a particular saved state of the repository, which includes all files and additions
+
+- **Branch**: a means of grouping a set of commits. Each branch has a unique history. This is primarily used for separating development and stable branches.
+
+- **Push**: update the remote repository with your local changes
+
+- **Pull**: update your local repository with the remote changes
+
+- **Clone**: retrieve a local copy of a repository to modify
+
+- **Fork**: duplicate a pre-existing repository to modify, and to compare against the original
+
+- **Merge**: combine various changes from different branches/commits/forks into a single history
+
+Refer to this link for more information on Git and Github: [https://docs.wpilib.org/en/stable/docs/software/basic-programming/git-getting-started.html](https://docs.wpilib.org/en/stable/docs/software/basic-programming/git-getting-started.html)
+
+## Command Based Programming
+
+Command Based programming is a clean, extensible and reusable robot programming methodology. It is an example of declarative programming, a style of software which focuses on describing what a program should do rather than how it gets done. The command-based library allows users to define desired robot behaviors while minimizing the amount of iteration-by-iteration robot logic that they must write. For example, in the command-based program, a user can specify that ?the robot should perform an action when a condition is true?
+
+![](/images/11L_Image_21.png)
+
+Lambda expressions are widely used in command based programming.
+
+Comparison of Command Based vs other methodologies
+
+```
+new Trigger(condition::get).onTrue(Commands.runOnce(() -> piston.set(DoubleSolenoid.Value.kForward)));
+
+VS
+
+if(condition.get()) {
+  if(!pressed) {
+    piston.set(DoubleSolenoid.Value.kForward);
+    pressed = true;
+  }
+} else {
+  pressed = false;
+}
+```
+### Subsystems
+
+Subsystems are abstractions for a collection of robot hardware that operates together as a unit. It forms the encapsulation for the hardware, hiding it from the rest of the robot code and restricting access to it except through subsystem?s public methods. Subsystems are represented in the command-based library by the Subsystem interface ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Subsystem.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc2_1_1_subsystem.html)).
+
+Basic Subsystem
+
+The *register()* method is automatically called to register the system with the scheduler. 
+
+This allows the *periodic()* method to run once per run of the scheduler(usually, once every 20ms). It is typically used for telemetry and other periodic actions that do not interfere with whatever command is requiring the subsystem.
+
+The *simulationPeriodic()* method is only run during Simulation and can be used to update the state of the robot. 
+
+`import`` ``edu.wpi.first.wpilibj2.command.Command``;`
+
+` 8``import`` ``edu.wpi.first.wpilibj2.command.SubsystemBase``;`
+
+```
+ 9
+`10``public`` ``class`` ``ExampleSubsystem`` ``extends`` ``SubsystemBase`` ``{`
+
+`11``  ``/** Creates a new ExampleSubsystem. */`
+
+`12``  ``public`` ``ExampleSubsystem``()`` ``{}`
+
+13
+`14``  ``/**`
+
+`15``   * Example command factory method.`
+
+`16``   *`
+
+`17``   * @return a command`
+
+`18``   */`
+
+`19``  ``public`` ``Command`` ``exampleMethodCommand``()`` ``{`
+
+`20``    ``// Inline construction of command goes here.`
+
+`21``    ``// Subsystem::RunOnce implicitly requires `this` subsystem.`
+
+`22``    ``return`` ``runOnce(`
+
+`23``        ``()`` ``->`` ``{`
+
+`24``          ``/* one-time action goes here */`
+
+`25``        ``});`
+
+`26``  ``}`
+
+27
+`28``  ``/**`
+
+`29``   * An example method querying a boolean state of the subsystem (for example, a digital sensor).`
+
+`30``   *`
+
+`31``   * @return value of some boolean subsystem state, such as a digital sensor.`
+
+`32``   */`
+
+`33``  ``public`` ``boolean`` ``exampleCondition``()`` ``{`
+
+`34``    ``// Query some boolean state, such as a digital sensor.`
+
+`35``    ``return`` ``false``;`
+
+`36``  ``}`
+
+37
+`38``  ``@Override`
+
+`39``  ``public`` ``void`` ``periodic``()`` ``{`
+
+`40``    ``// This method will be called once per scheduler run`
+
+`41``  ``}`
+
+42
+`43``  ``@Override`
+
+`44``  ``public`` ``void`` ``simulationPeriodic``()`` ``{`
+
+`45``    ``// This method will be called once per scheduler run during simulation`
+
+`46``  ``}`
+
+47}
+```
+
+### Commands
+
+Commands represent actions the robot can take and run when scheduled, until they are interrupted or their end condition is met. Commands are represented in the command-based library by the Command class ([Java](https://github.wpilib.org/allwpilib/docs/release/java/edu/wpi/first/wpilibj2/command/Command.html), [C++](https://github.wpilib.org/allwpilib/docs/release/cpp/classfrc2_1_1_command.html)).
+
+The *initialize()* method marks the command start, and is called exactly once per time a command is scheduled. It is also useful for performing tasks that only need to be performed once per time scheduled, such as setting motors to run at a constant speed or setting the state of a solenoid actuator.
+
+The execution() method is called repeatedly while the command is scheduled; this is when the scheduler?s run() method is called. The execute block should be used for any task that needs to be done continually while the command is scheduled, such as updating motor outputs to match joystick inputs, or using the output of a control loop.
+
+The *end(boolean interrupted)* method is called once the command ends, when the *isFinished()* method, called after each *execute()*, returns true or it was interrupted. The end block should be used to ?wrap up? command state in a neat way, such as setting motors back to zero or reverting a solenoid actuator to a ?default? state.
+
+## Joysticks
+
+A joystick can be used with the Driver Station program to control the robot. Almost any ?controller? that can be recognized by Windows can be used as a joystick. Each axis of the controller ranges from -1 to 1.
+
+*Joystick* class
+
+`Joystick`` ``exampleJoystick`` ``=`` ``new`` ``Joystick(``0``);`` ``// 0 is the USB Port to be used as indicated on the Driver Station`
+
+![](/images/vNp_Image_21.png)
+
+The `Joystick` class is designed to make using a flight joystick to operate the robot significantly easier. Depending on the flight joystick, the user may need to set the specific X, Y, Z, and Throttle channels that your flight joystick uses. This class offers special methods for accessing the angle and magnitude of the flight joystick.
+
+*XboxController* Class
+
+`XboxController`` ``exampleXbox`` ``=`` ``new`` ``XboxController(``0``);`` ``// 0 is the USB Port to be used as indicated on the Driver Station`
+
+![](/images/vR7_Image_22.png)
+
+The `XboxController` class provides named methods (e.g. `getXButton`, `getXButtonPressed`, `getXButtonReleased`) for each of the buttons, and the indices can be accessed with `XboxController.Button.kX.value`. The rumble feature of the controller can be controlled by using `XboxController.setRumble(GenericHID.RumbleType.kRightRumble, value)`. Many users do a split stick arcade drive that uses the left stick for just forwards / backwards and the right stick for left / right turning.
+
+*PS4Controller* Class
+
+`PS4Controller`` ``examplePS4`` ``=`` ``new`` ``PS4Controller(``0``);`` ``// 0 is the USB Port to be used as indicated on the Driver Station`
+
+![](/images/Kqy_Image_23.png)
+
+The `PS4Controller` class provides named methods (e.g. `getSquareButton`, `getSquareButtonPressed`, `getSquareButtonReleased`) for each of the buttons, and the indices can be accessed with `PS4Controller.Button.kSquare.value`. The rumble feature of the controller can be controlled by using `PS4Controller.setRumble(GenericHID.RumbleType.kRightRumble, value)`.
+
+Button Usage
+
+`if`` ``(joystick.``getRawButtonPressed``(``0``))`` ``{`
+
+`   ``turnIntakeOn();`` ``// When pressed the intake turns on`
+
+```
+}
+`if`` ``(joystick.``getRawButtonReleased``(``0``))`` ``{`
+
+`   ``turnIntakeOff();`` ``// When released the intake turns off`
+
+}
+
+OR
+
+`if`` ``(joystick.``getRawButton``(``0``))`` ``{`
+
+`   ``turnIntakeOn();`
+
+`}`` ``else`` ``{`
+
+`   ``turnIntakeOff();`
+
+}
+```
+
+Toggle Button
+
+`boolean`` ``toggle`` ``=`` ``false``;`
+
+`if`` ``(joystick.``getRawButtonPressed``(``0``))`` ``{`
+
+`   ``if`` ``(toggle)`` ``{`
+
+`      ``// Current state is true so turn off`
+
+`      ``retractIntake();`
+
+`      ``toggle`` ``=`` ``false``;`
+
+`   ``}`` ``else`` ``{`
+
+`      ``// Current state is false so turn on`
+
+`      ``deployIntake();`
+
+`      ``toggle`` ``=`` ``true``;`
+
+`   ``}`
+
+```
+}
+```
+
+## Robot Preferences
+
+` ``public`` ``static`` ``final`` ``String`` ``kArmPositionKey`` ``=`` ``"ArmPosition"``;`
+
+` ``public`` ``static`` ``final`` ``String`` ``kArmPKey`` ``=`` ``"ArmP"``;`
+
+` ``// The P gain for the PID controller that drives this arm.`
+
+` ``public`` ``static`` ``final`` ``double`` ``kDefaultArmKp`` ``=`` ``50.0``;`
+
+` ``public`` ``static`` ``final`` ``double`` ``kDefaultArmSetpointDegrees`` ``=`` ``75.0``;`
+
+` ``// The P gain for the PID controller that drives this arm.`
+
+` ``private`` ``double`` ``m_armKp`` ``=`` ``Constants.``kDefaultArmKp``;`
+
+` ``private`` ``double`` ``m_armSetpointDegrees`` ``=`` ``Constants.``kDefaultArmSetpointDegrees``;`
+
+`  ``/** Subsystem constructor. */`
+
+` ``public`` ``Arm``()`` ``{`
+
+`    ``// Set the Arm position setpoint and P constant to Preferences if the keys don't already exist`
+
+`   ``Preferences.``initDouble``(Constants.``kArmPositionKey``,`` ``m_armSetpointDegrees);`
+
+`   ``Preferences.``initDouble``(Constants.``kArmPKey``,`` ``m_armKp);`
+
+```
+}
+
+
+
+
+
+
+
+
+
 # Hardware APIs
+
+```
+
+***Some of the example code is TimedRobot based***
 
 ## Motors
 
@@ -813,214 +1100,6 @@ The three default modes
 
 ```
 }
-
-
-
-
-
-
-
-
-
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# 
-
-# Programming
-
-```
-
-## Git Version Control
-
-Git is a Distributed Version Control System used for tracking changes in code. It allows for separation of testing environments into different branches, ability to manage different commits, etc.
-
-Download links:
-
-- [Windows](https://git-scm.com/download/win)
-
-- [macOS](https://git-scm.com/download/mac)
-
-- [Linux](https://git-scm.com/download/linux)
-
-Some Important Vocabulary:
-
-- **Repository**: the data structure of your code, including a .git folder in the root directory
-
-- **Commit**: a particular saved state of the repository, which includes all files and additions
-
-- **Branch**: a means of grouping a set of commits. Each branch has a unique history. This is primarily used for separating development and stable branches.
-
-- **Push**: update the remote repository with your local changes
-
-- **Pull**: update your local repository with the remote changes
-
-- **Clone**: retrieve a local copy of a repository to modify
-
-- **Fork**: duplicate a pre-existing repository to modify, and to compare against the original
-
-- **Merge**: combine various changes from different branches/commits/forks into a single history
-
-Refer to this link for more information on Git and Github: [https://docs.wpilib.org/en/stable/docs/software/basic-programming/git-getting-started.html](https://docs.wpilib.org/en/stable/docs/software/basic-programming/git-getting-started.html)
-
-## Joysticks
-
-A joystick can be used with the Driver Station program to control the robot. Almost any ?controller? that can be recognized by Windows can be used as a joystick. Each axis of the controller ranges from -1 to 1.
-
-*Joystick* class
-
-`Joystick`` ``exampleJoystick`` ``=`` ``new`` ``Joystick(``0``);`` ``// 0 is the USB Port to be used as indicated on the Driver Station`
-
-![](/images/vNp_Image_21.png)
-
-The `Joystick` class is designed to make using a flight joystick to operate the robot significantly easier. Depending on the flight joystick, the user may need to set the specific X, Y, Z, and Throttle channels that your flight joystick uses. This class offers special methods for accessing the angle and magnitude of the flight joystick.
-
-*XboxController* Class
-
-`XboxController`` ``exampleXbox`` ``=`` ``new`` ``XboxController(``0``);`` ``// 0 is the USB Port to be used as indicated on the Driver Station`
-
-![](/images/vR7_Image_22.png)
-
-The `XboxController` class provides named methods (e.g. `getXButton`, `getXButtonPressed`, `getXButtonReleased`) for each of the buttons, and the indices can be accessed with `XboxController.Button.kX.value`. The rumble feature of the controller can be controlled by using `XboxController.setRumble(GenericHID.RumbleType.kRightRumble, value)`. Many users do a split stick arcade drive that uses the left stick for just forwards / backwards and the right stick for left / right turning.
-
-*PS4Controller* Class
-
-`PS4Controller`` ``examplePS4`` ``=`` ``new`` ``PS4Controller(``0``);`` ``// 0 is the USB Port to be used as indicated on the Driver Station`
-
-![](/images/Kqy_Image_23.png)
-
-The `PS4Controller` class provides named methods (e.g. `getSquareButton`, `getSquareButtonPressed`, `getSquareButtonReleased`) for each of the buttons, and the indices can be accessed with `PS4Controller.Button.kSquare.value`. The rumble feature of the controller can be controlled by using `PS4Controller.setRumble(GenericHID.RumbleType.kRightRumble, value)`.
-
-Button Usage
-
-`if`` ``(joystick.``getRawButtonPressed``(``0``))`` ``{`
-
-`   ``turnIntakeOn();`` ``// When pressed the intake turns on`
-
-```
-}
-`if`` ``(joystick.``getRawButtonReleased``(``0``))`` ``{`
-
-`   ``turnIntakeOff();`` ``// When released the intake turns off`
-
-}
-
-OR
-
-`if`` ``(joystick.``getRawButton``(``0``))`` ``{`
-
-`   ``turnIntakeOn();`
-
-`}`` ``else`` ``{`
-
-`   ``turnIntakeOff();`
-
-}
-```
-
-Toggle Button
-
-`boolean`` ``toggle`` ``=`` ``false``;`
-
-`if`` ``(joystick.``getRawButtonPressed``(``0``))`` ``{`
-
-`   ``if`` ``(toggle)`` ``{`
-
-`      ``// Current state is true so turn off`
-
-`      ``retractIntake();`
-
-`      ``toggle`` ``=`` ``false``;`
-
-`   ``}`` ``else`` ``{`
-
-`      ``// Current state is false so turn on`
-
-`      ``deployIntake();`
-
-`      ``toggle`` ``=`` ``true``;`
-
-`   ``}`
-
-```
-}
-```
-
-## Robot Preferences
-
-` ``public`` ``static`` ``final`` ``String`` ``kArmPositionKey`` ``=`` ``"ArmPosition"``;`
-
-` ``public`` ``static`` ``final`` ``String`` ``kArmPKey`` ``=`` ``"ArmP"``;`
-
-` ``// The P gain for the PID controller that drives this arm.`
-
-` ``public`` ``static`` ``final`` ``double`` ``kDefaultArmKp`` ``=`` ``50.0``;`
-
-` ``public`` ``static`` ``final`` ``double`` ``kDefaultArmSetpointDegrees`` ``=`` ``75.0``;`
-
-` ``// The P gain for the PID controller that drives this arm.`
-
-` ``private`` ``double`` ``m_armKp`` ``=`` ``Constants.``kDefaultArmKp``;`
-
-` ``private`` ``double`` ``m_armSetpointDegrees`` ``=`` ``Constants.``kDefaultArmSetpointDegrees``;`
-
-`  ``/** Subsystem constructor. */`
-
-` ``public`` ``Arm``()`` ``{`
-
-`    ``// Set the Arm position setpoint and P constant to Preferences if the keys don't already exist`
-
-`   ``Preferences.``initDouble``(Constants.``kArmPositionKey``,`` ``m_armSetpointDegrees);`
-
-`   ``Preferences.``initDouble``(Constants.``kArmPKey``,`` ``m_armKp);`
-
-```
-}
-
-
-
-
-
-
-
 
 
 
